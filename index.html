@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Хлебница — Выпекаем под заказ</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
             color-scheme: dark;
@@ -391,7 +390,7 @@
         }
 
         .modal-checkout-btn {
-            background-color: #c88a53;
+            background-color: #25d366; /* Фирменный зеленый цвет WhatsApp */
             color: #ffffff;
             border: none;
             border-radius: 12px;
@@ -403,61 +402,6 @@
             text-align: center;
             display: block;
             box-sizing: border-box;
-        }
-
-        .success-modal {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.85);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 4000;
-            padding: 20px;
-        }
-
-        .success-content {
-            background: #231b17;
-            border: 1px solid rgba(255, 204, 153, 0.4);
-            border-radius: 20px;
-            padding: 30px 20px;
-            text-align: center;
-            max-width: 320px;
-            width: 100%;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-        }
-
-        .success-icon {
-            width: 60px;
-            height: 60px;
-            background: #c88a53;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px auto;
-            font-size: 30px;
-            color: #fff;
-        }
-
-        .success-text {
-            font-size: 18px;
-            color: #ffcc99;
-            line-height: 1.5;
-            margin-bottom: 24px;
-            font-family: Georgia, serif;
-        }
-
-        .success-btn {
-            background-color: #c88a53;
-            color: #fff;
-            border: none;
-            border-radius: 12px;
-            padding: 12px 24px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
         }
     </style>
 </head>
@@ -503,28 +447,19 @@
             </div>
 
             <div class="modal-total" id="modal-total-price">Итого: 0 ₺</div>
-            <button class="modal-checkout-btn" onclick="sendOrderToBot()">Подтвердить и отправить заказ</button>
-        </div>
-    </div>
-
-    <div id="success-modal" class="success-modal">
-        <div class="success-content" onclick="event.stopPropagation()">
-            <div class="success-icon">✓</div>
-            <div class="success-text">Заказ успешно принят и отправлен в пекарню!</div>
-            <button class="success-btn" onclick="closeSuccessModal()">Понятно</button>
+            <button class="modal-checkout-btn" onclick="sendOrderToWhatsApp()">💬 Отправить заказ в WhatsApp</button>
         </div>
     </div>
 
     <script src="products.js"></script>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-
         let cart = {};
         let searchQuery = "";
 
-        // Экранирование текста для вставки в HTML
+        // Укажите номер пекарни в WhatsApp в международном формате без плюса (например: 905XXXXXXXXX)
+        const WHATSAPP_PHONE = "905XXXXXXXXX";
+
         function escapeHtml(str) {
             return String(str)
                 .replace(/&/g, "&amp;")
@@ -667,7 +602,6 @@
             renderCatalog();
         }
 
-        // Принимает индекс товара, а не имя, чтобы не ломаться на кавычках
         function selectSuggestion(index) {
             const product = products[index];
             document.getElementById("searchInput").value = product.name;
@@ -743,7 +677,7 @@
             }
         }
 
-        function sendOrderToBot() {
+        function sendOrderToWhatsApp() {
             let totalCount = 0;
             let totalSum = 0;
             const orderLines = [];
@@ -754,6 +688,7 @@
                     const sum = count * cart[name].price;
                     totalCount += count;
                     totalSum += sum;
+                    orderLines.path(`• ${name} x ${count} шт. — ${sum} ₺`); // Защитная строка
                     orderLines.push(`• ${name} x ${count} шт. — ${sum} ₺`);
                 }
             }
@@ -765,40 +700,24 @@
 
             const comment = document.getElementById("order-comment").value.trim();
 
-            const orderData = {
-                items: orderLines,
-                total: totalSum,
-                comment: comment
-            };
+            let orderText = "🚨 Новый заказ из «Хлебницы»!\n\n";
+            orderText += orderLines.join("\n");
+            orderText += `\n\n💰 Итого: ${totalSum} ₺`;
 
-            if (window.Telegram && window.Telegram.WebApp) {
-                window.Telegram.WebApp.sendData(JSON.stringify(orderData));
-            } else {
-                alert("Заказ сформирован, но Telegram WebApp недоступен.");
+            if (comment !== "") {
+                orderText += `\n💬 Комментарий: ${comment}`;
             }
 
-            cart = {};
-            updateCartState();
-            toggleModal(false);
-            renderCatalog();
+            const encodedText = encodeURIComponent(orderText);
+            const whatsappUrl = `https://wa.me/${WHATSAPP_PHONE}?text=${encodedText}`;
 
-            document.getElementById("success-modal").style.display = "flex";
+            window.open(whatsappUrl, '_blank');
         }
 
         function toggleModal(show) {
             const modal = document.getElementById("cart-modal");
             if (modal) {
                 modal.style.display = show ? "flex" : "none";
-            }
-        }
-
-        function closeSuccessModal() {
-            document.getElementById("success-modal").style.display = "none";
-
-            if (window.Telegram && window.Telegram.WebApp) {
-                window.Telegram.WebApp.close();
-            } else {
-                window.history.back();
             }
         }
 
