@@ -688,7 +688,6 @@
                     const sum = count * cart[name].price;
                     totalCount += count;
                     totalSum += sum;
-                    orderLines.path(`• ${name} x ${count} шт. — ${sum} ₺`); // Защитная строка
                     orderLines.push(`• ${name} x ${count} шт. — ${sum} ₺`);
                 }
             }
