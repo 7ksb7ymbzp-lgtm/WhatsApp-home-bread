@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Хлебница — Выпекаем под заказ</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            color-scheme: dark;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #2c221e;
+            background-image: linear-gradient(rgba(44, 34, 30, 0.85), rgba(44, 34, 30, 0.95)),
+                url('https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=1000&auto=format&fit=crop');
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-attachment: fixed;
+            background-size: cover;
+            color: #fcf8f2;
+            margin: 0;
+            padding: 14px;
+            padding-bottom: 180px;
+            font-size: 18px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 18px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        header h1 {
+            font-size: 32px;
+            margin: 0 0 10px 0;
+            font-family: Georgia, serif;
+            font-style: italic;
+            color: #ffcc99;
+        }
+
+        header p {
+            font-size: 17px;
+            color: #e6dfd5;
+            margin: 8px 0;
+            line-height: 1.5;
+        }
+
+        .delivery-info {
+            background: rgba(212, 143, 84, 0.25);
+            border: 1px dashed rgba(255, 204, 153, 0.4);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-top: 14px;
+            font-size: 16px;
+            color: #ffebd0;
+        }
+
+        .floating-search-container {
+            position: fixed;
+            bottom: 100px;
+            right: 16px;
+            z-index: 1500;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .search-toggle-btn {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: #c88a53;
+            color: #fff;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .search-popup {
+            display: none;
+            flex-direction: column;
+            position: absolute;
+            bottom: 55px;
+            right: 0;
+            background: #231b17;
+            border: 1px solid rgba(255, 204, 153, 0.3);
+            border-radius: 16px;
+            padding: 14px;
+            box-shadow: 0 6px 25px rgba(0,0,0,0.5);
+            width: min(320px, calc(100vw - 48px));
+            box-sizing: border-box;
+        }
+
+        .search-popup input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid rgba(255, 204, 153, 0.3);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.07);
+            color: #fff;
+            font-size: 17px;
+            box-sizing: border-box;
+        }
+
+        .search-suggestions-popup {
+            display: none;
+            flex-direction: column;
+            max-height: 220px;
+            overflow-y: auto;
+            margin-top: 10px;
+            background: #2a201c;
+            border-radius: 10px;
+        }
+
+        .suggestion-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            cursor: pointer;
+        }
+
+        .suggestion-img {
+            width: 45px;
+            height: 45px;
+            border-radius: 8px;
+            object-fit: cover;
+            margin-right: 12px;
+        }
+
+        .category-title {
+            font-size: 22px;
+            font-family: Georgia, serif;
+            font-style: italic;
+            color: #ffcc99;
+            margin: 28px 0 14px 4px;
+            border-bottom: 1px solid rgba(255, 204, 153, 0.2);
+            padding-bottom: 8px;
+        }
+
+        .catalog-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-img {
+            width: 100%;
+            height: 140px;
+            border-radius: 10px;
+            object-fit: cover;
+            margin-bottom: 10px;
+        }
+
+        .card-title {
+            margin: 0 0 6px 0;
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffffff;
+            line-height: 1.2;
+        }
+
+        .card-desc {
+            margin: 0 0 12px 0;
+            font-size: 14px;
+            color: #d1c7bd;
+            line-height: 1.35;
+            min-height: 38px;
+        }
+
+        .card-footer {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: auto;
+        }
+
+        .price-weight {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-price {
+            font-weight: 700;
+            color: #ffcc99;
+            font-size: 18px;
+        }
+
+        .card-weight {
+            font-size: 14px;
+            color: #b8aba0;
+        }
+
+        .counter-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            padding: 4px 8px;
+            gap: 6px;
+        }
+
+        .round-btn {
+            background: #c88a53;
+            color: #ffffff;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .counter-value {
+            font-size: 17px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .btn-action {
+            background-color: #c88a53;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+        }
+
+        .cart-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #231b17;
+            border-top: 1px solid rgba(255, 204, 153, 0.3);
+            padding: 16px 20px;
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 -6px 25px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            cursor: pointer;
+        }
+
+        .cart-info {
+            font-size: 16px;
+            color: #e6dfd5;
+        }
+
+        .cart-total {
+            font-size: 20px;
+            font-weight: 700;
+            color: #ffcc99;
+        }
+
+        .checkout-btn {
+            background-color: #c88a53;
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            justify-content: center;
+            align-items: flex-end;
+            z-index: 3000;
+        }
+
+        .modal-content {
+            background: #231b17;
+            border: 1px solid rgba(255, 204, 153, 0.3);
+            border-radius: 20px 20px 0 0;
+            width: 100%;
+            max-height: 85vh;
+            padding: 22px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 204, 153, 0.2);
+            padding-bottom: 14px;
+            margin-bottom: 16px;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 22px;
+            color: #ffcc99;
+            font-family: Georgia, serif;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: #e6dfd5;
+            font-size: 26px;
+            cursor: pointer;
+        }
+
+        .cart-items-list {
+            overflow-y: auto;
+            max-height: 32vh;
+            margin-bottom: 16px;
+        }
+
+        .cart-item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 16px;
+            color: #fff;
+        }
+
+        .comment-box {
+            margin-bottom: 16px;
+        }
+
+        .comment-box label {
+            display: block;
+            font-size: 15px;
+            color: #ffcc99;
+            margin-bottom: 8px;
+        }
+
+        .comment-box textarea {
+            width: 100%;
+            height: 70px;
+            padding: 12px;
+            border: 1px solid rgba(255, 204, 153, 0.3);
+            border-radius: 10px;
+            box-sizing: border-box;
+            font-size: 15px;
+            background: rgba(255, 255, 255, 0.07);
+            color: #fff;
+            resize: none;
+        }
+
+        .modal-total {
+            font-size: 20px;
+            font-weight: 700;
+            color: #ffcc99;
+            text-align: right;
+            margin-bottom: 16px;
+        }
+
+        .modal-checkout-btn {
+            background-color: #c88a53;
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 18px;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            text-align: center;
+            display: block;
+            box-sizing: border-box;
+        }
+
+        .success-modal {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 4000;
+            padding: 20px;
+        }
+
+        .success-content {
+            background: #231b17;
+            border: 1px solid rgba(255, 204, 153, 0.4);
+            border-radius: 20px;
+            padding: 30px 20px;
+            text-align: center;
+            max-width: 320px;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+        }
+
+        .success-icon {
+            width: 60px;
+            height: 60px;
+            background: #c88a53;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px auto;
+            font-size: 30px;
+            color: #fff;
+        }
+
+        .success-text {
+            font-size: 18px;
+            color: #ffcc99;
+            line-height: 1.5;
+            margin-bottom: 24px;
+            font-family: Georgia, serif;
+        }
+
+        .success-btn {
+            background-color: #c88a53;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Выпекаем под заказ</h1>
+        <p>Заказ принимаем за день до предполагаемой доставки.<br>В выходные хлеб не доставляем, принимаем на понедельник.</p>
+        <div class="delivery-info">
+            🚗 Доставка с 16:00 - 17:00 час.
+        </div>
+    </header>
+
+    <div id="searchContainer" class="floating-search-container">
+        <button id="searchMainBtn" class="search-toggle-btn" onclick="toggleSearchPopup()">🔍</button>
+        <button id="searchCloseBtn" class="search-toggle-btn" style="display: none; background: #c55; color: #fff;" onclick="closeSearch()">✕</button>
+        <div id="searchPopup" class="search-popup">
+            <input type="text" id="searchInput" placeholder="Поиск по меню..." oninput="handleSearch()">
+            <div id="searchSuggestions" class="search-suggestions-popup"></div>
+        </div>
+    </div>
+
+    <div id="catalog-container"></div>
+
+    <div id="cart-bar" class="cart-bar" onclick="toggleModal(true)">
+        <div class="cart-info">
+            <div>🛒 В корзине: <span id="cart-count">0</span> шт.</div>
+            <div class="cart-total" id="cart-total">0 ₺</div>
+        </div>
+        <button class="checkout-btn" onclick="event.stopPropagation(); toggleModal(true);">Посмотреть заказ</button>
+    </div>
+
+    <div id="cart-modal" class="modal-overlay" onclick="toggleModal(false)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2>Ваш заказ</h2>
+                <button class="close-modal" onclick="toggleModal(false)">✕</button>
+            </div>
+            <div id="cart-items-list" class="cart-items-list"></div>
+
+            <div class="comment-box">
+                <label for="order-comment">Комментарий к заказу (аллергия, пожелания):</label>
+                <textarea id="order-comment" placeholder="Например: аллергия на морковь..."></textarea>
+            </div>
+
+            <div class="modal-total" id="modal-total-price">Итого: 0 ₺</div>
+            <button class="modal-checkout-btn" onclick="sendOrderToBot()">Подтвердить и отправить заказ</button>
+        </div>
+    </div>
+
+    <div id="success-modal" class="success-modal">
+        <div class="success-content" onclick="event.stopPropagation()">
+            <div class="success-icon">✓</div>
+            <div class="success-text">Заказ успешно принят и отправлен в пекарню!</div>
+            <button class="success-btn" onclick="closeSuccessModal()">Понятно</button>
+        </div>
+    </div>
+
+    <script src="products.js"></script>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        let cart = {};
+        let searchQuery = "";
+
+        // Экранирование текста для вставки в HTML
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+        }
+
+        function renderCatalog() {
+            const container = document.getElementById("catalog-container");
+            if (!container) return;
+
+            let html = "";
+            let currentCategory = "";
+
+            const filteredProducts = products.filter(p =>
+                p.name.toLowerCase().includes(searchQuery) ||
+                p.desc.toLowerCase().includes(searchQuery) ||
+                p.category.toLowerCase().includes(searchQuery)
+            );
+
+            if (filteredProducts.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding: 40px; color: #ffcc99; font-size: 18px;">Ничего не найдено</div>`;
+                return;
+            }
+
+            filteredProducts.forEach((p) => {
+                const originalIndex = products.findIndex(item => item.name === p.name);
+
+                if (p.category !== currentCategory) {
+                    if (currentCategory !== "") html += `</div>`;
+                    currentCategory = p.category;
+                    html += `<div class="category-title">${escapeHtml(currentCategory)}</div><div class="catalog-grid">`;
+                }
+
+                const count = cart[p.name] ? cart[p.name].count : 0;
+
+                html += `
+                    <div class="card">
+                        <img src="${escapeHtml(p.img)}" class="card-img" alt="${escapeHtml(p.name)}">
+                        <div>
+                            <div class="card-title">${escapeHtml(p.name)}</div>
+                            <div class="card-desc">${escapeHtml(p.desc)}</div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="price-weight">
+                                <div class="card-price">${p.price} ₺</div>
+                                <div class="card-weight">${escapeHtml(p.weight)}</div>
+                            </div>
+                            <div id="control-${originalIndex}">
+                                ${count === 0 ?
+                                    `<button class="btn-action" onclick="changeQty(${originalIndex}, 1)">Добавить</button>` :
+                                    `<div class="counter-row">
+                                        <button class="round-btn" onclick="changeQty(${originalIndex}, -1)">-</button>
+                                        <span class="counter-value">${count}</span>
+                                        <button class="round-btn" onclick="changeQty(${originalIndex}, 1)">+</button>
+                                     </div>`
+                                }
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            if (currentCategory !== "") html += `</div>`;
+            container.innerHTML = html;
+        }
+
+        function toggleSearchPopup() {
+            const popup = document.getElementById("searchPopup");
+            const searchMainBtn = document.getElementById("searchMainBtn");
+            const searchCloseBtn = document.getElementById("searchCloseBtn");
+
+            if (popup.style.display === "flex") {
+                popup.style.display = "none";
+            } else {
+                popup.style.display = "flex";
+                document.getElementById("searchInput").focus();
+                if (document.getElementById("searchInput").value.trim().length > 0) {
+                    searchMainBtn.style.display = "none";
+                    searchCloseBtn.style.display = "flex";
+                }
+            }
+        }
+
+        function handleSearch() {
+            const input = document.getElementById("searchInput");
+            searchQuery = input.value.trim().toLowerCase();
+            const suggestionsBox = document.getElementById("searchSuggestions");
+            const searchMainBtn = document.getElementById("searchMainBtn");
+            const searchCloseBtn = document.getElementById("searchCloseBtn");
+
+            renderCatalog();
+
+            if (searchQuery.length > 0) {
+                searchMainBtn.style.display = "none";
+                searchCloseBtn.style.display = "flex";
+
+                const matches = products.filter(p =>
+                    p.name.toLowerCase().includes(searchQuery) ||
+                    p.desc.toLowerCase().includes(searchQuery)
+                );
+
+                if (matches.length > 0) {
+                    let suggestHtml = "";
+                    matches.slice(0, 5).forEach(m => {
+                        const originalIndex = products.findIndex(item => item.name === m.name);
+                        suggestHtml += `
+                            <div class="suggestion-item" onclick="selectSuggestion(${originalIndex})">
+                                <img src="${escapeHtml(m.img)}" class="suggestion-img">
+                                <div>
+                                    <span style="font-size:15px; font-weight:600; color:#fff;">${escapeHtml(m.name)}</span><br>
+                                    <span style="font-size:14px; color:#ffcc99;">${m.price} ₺</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    suggestionsBox.innerHTML = suggestHtml;
+                    suggestionsBox.style.display = "flex";
+                } else {
+                    suggestionsBox.innerHTML = `<div style="padding:10px; font-size:14px; color:#d1c7bd; text-align:center;">Ничего не найдено</div>`;
+                    suggestionsBox.style.display = "flex";
+                }
+            } else {
+                searchMainBtn.style.display = "flex";
+                searchCloseBtn.style.display = "none";
+                suggestionsBox.innerHTML = "";
+                suggestionsBox.style.display = "none";
+            }
+        }
+
+        function closeSearch() {
+            document.getElementById("searchInput").value = "";
+            searchQuery = "";
+            document.getElementById("searchPopup").style.display = "none";
+            document.getElementById("searchSuggestions").style.display = "none";
+            document.getElementById("searchMainBtn").style.display = "flex";
+            document.getElementById("searchCloseBtn").style.display = "none";
+            renderCatalog();
+        }
+
+        // Принимает индекс товара, а не имя, чтобы не ломаться на кавычках
+        function selectSuggestion(index) {
+            const product = products[index];
+            document.getElementById("searchInput").value = product.name;
+            searchQuery = product.name.toLowerCase();
+            document.getElementById("searchPopup").style.display = "none";
+            document.getElementById("searchSuggestions").style.display = "none";
+            renderCatalog();
+        }
+
+        function changeQty(index, delta) {
+            const product = products[index];
+            if (!cart[product.name]) {
+                cart[product.name] = { count: 0, price: product.price };
+            }
+
+            cart[product.name].count += delta;
+            if (cart[product.name].count < 0) {
+                cart[product.name].count = 0;
+            }
+
+            renderCatalog();
+            updateCartState();
+        }
+
+        function updateCartState() {
+            let totalCount = 0;
+            let totalSum = 0;
+            let modalListHtml = "";
+
+            for (const name in cart) {
+                if (cart[name].count > 0) {
+                    const count = cart[name].count;
+                    const sum = count * cart[name].price;
+                    totalCount += count;
+                    totalSum += sum;
+
+                    modalListHtml += `
+                        <div class="cart-item-row">
+                            <span><b>${escapeHtml(name)}</b></span>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div class="counter-row" style="padding: 4px 8px;">
+                                    <button class="round-btn" onclick="updateCartQty('${escapeHtml(name)}', -1)">-</button>
+                                    <span class="counter-value" style="margin: 0 8px; font-size:17px;">${count}</span>
+                                    <button class="round-btn" onclick="updateCartQty('${escapeHtml(name)}', 1)">+</button>
+                                </div>
+                                <span style="color: #ffcc99; width: 70px; text-align: right; font-weight:700;">${sum} ₺</span>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            const cartBar = document.getElementById("cart-bar");
+
+            if (totalCount > 0) {
+                document.getElementById("cart-count").innerText = totalCount;
+                document.getElementById("cart-total").innerText = totalSum + " ₺";
+                document.getElementById("cart-items-list").innerHTML = modalListHtml;
+                document.getElementById("modal-total-price").innerText = `Итого к оплате: ${totalSum} ₺`;
+                cartBar.style.display = "flex";
+            } else {
+                cartBar.style.display = "none";
+                toggleModal(false);
+            }
+        }
+
+        function updateCartQty(name, delta) {
+            if (cart[name]) {
+                cart[name].count += delta;
+                if (cart[name].count <= 0) delete cart[name];
+                renderCatalog();
+                updateCartState();
+            }
+        }
+
+        function sendOrderToBot() {
+            let totalCount = 0;
+            let totalSum = 0;
+            const orderLines = [];
+
+            for (const name in cart) {
+                if (cart[name].count > 0) {
+                    const count = cart[name].count;
+                    const sum = count * cart[name].price;
+                    totalCount += count;
+                    totalSum += sum;
+                    orderLines.push(`• ${name} x ${count} шт. — ${sum} ₺`);
+                }
+            }
+
+            if (totalCount === 0) {
+                alert("Ваша корзина пуста!");
+                return;
+            }
+
+            const comment = document.getElementById("order-comment").value.trim();
+
+            const orderData = {
+                items: orderLines,
+                total: totalSum,
+                comment: comment
+            };
+
+            if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.sendData(JSON.stringify(orderData));
+            } else {
+                alert("Заказ сформирован, но Telegram WebApp недоступен.");
+            }
+
+            cart = {};
+            updateCartState();
+            toggleModal(false);
+            renderCatalog();
+
+            document.getElementById("success-modal").style.display = "flex";
+        }
+
+        function toggleModal(show) {
+            const modal = document.getElementById("cart-modal");
+            if (modal) {
+                modal.style.display = show ? "flex" : "none";
+            }
+        }
+
+        function closeSuccessModal() {
+            document.getElementById("success-modal").style.display = "none";
+
+            if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.close();
+            } else {
+                window.history.back();
+            }
+        }
+
+        renderCatalog();
+    </script>
+</body>
+</html>
