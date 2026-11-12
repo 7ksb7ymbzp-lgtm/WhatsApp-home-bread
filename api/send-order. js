@@ -1,0 +1,41 @@
+// api/send-order.js — секретный код, клиент его НЕ видит
+export default async function handler(req, res) {
+  // Разрешаем только POST
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  try {
+    const { name, phone, address, orderLines, totalSum, comment } = req.body;
+
+    if (!orderLines || orderLines.length === 0) {
+      return res.status(400).json({ error: "Empty order" });
+    }
+
+    const text = `🚨 Новый заказ из «Хлебницы»!\n\n👤 Имя: ${name}\n📞 Телефон: ${phone}\n📍 Адрес: ${address || "Самовывоз"}\n\n${orderLines.join("\n")}\n\n💰 Итого: ${totalSum} ₺\n💵 Оплата: Наличные\n${comment ? `💬 Комментарий: ${comment}` : ""}`;
+
+    // --- Отправка в СЕКРЕТНУЮ группу WhatsApp через Green API ---
+    const greenRes = await fetch(
+      `https://api.green-api.com/waInstance${process.env.GREEN_INSTANCE_ID}/sendMessage/${process.env.GREEN_API_TOKEN}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chatId: process.env.WHATSAPP_GROUP_ID, // вида 120207123456789@g.us
+          message: text
+        })
+      }
+    );
+
+    if (!greenRes.ok) {
+      const err = await greenRes.text();
+      console.error("Green API error:", err);
+      return res.status(500).json({ error: "Green API failed" });
+    }
+
+    return res.status(200).json({ ok: true });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: "Server error" });
+  }
+}
