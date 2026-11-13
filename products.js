@@ -1,5 +1,3 @@
-// products.js - EDIT ONLY THIS FILE
-// To change price - change only price: 100
 window.PRODUCTS = [
   { category_en: "Bread (All sourdough!)", category_de: "Brot (Alles Sauerteig!)", name_en: "Darnitsky", name_de: "Darnizki", desc_en: "Classic rye-wheat", desc_de: "Klassisches Roggen-Weizen", price: 100, weight: "500 g", img: "https://i.ibb.co/mV675qBf/image.jpg" },
   { category_en: "Bread (All sourdough!)", category_de: "Brot (Alles Sauerteig!)", name_en: "Rye", name_de: "Roggenbrot", desc_en: "Natural sourdough", desc_de: "Natürlicher Sauerteig", price: 100, weight: "500 g", img: "https://i.ibb.co/kgnWr2qp/image.jpg" },
@@ -9,7 +7,7 @@ window.PRODUCTS = [
   { category_en: "Bread (All sourdough!)", category_de: "Brot (Alles Sauerteig!)", name_en: "Buckwheat", name_de: "Buchweizenbrot", desc_en: "Healthy buckwheat bread", desc_de: "Gesundes Buchweizenbrot", price: 100, weight: "500 g", img: "https://i.ibb.co/H8kHTCr/IMG-5177.jpg" },
   { category_en: "Bread (All sourdough!)", category_de: "Brot (Alles Sauerteig!)", name_en: "With olives", name_de: "Mit Oliven", desc_en: "With dried olives", desc_de: "Mit getrockneten Oliven", price: 100, weight: "500 g", img: "https://i.ibb.co/n86Y13xh/image.jpg" },
   { category_en: "Bread (All sourdough!)", category_de: "Brot (Alles Sauerteig!)", name_en: "Onion", name_de: "Zwiebelbrot", desc_en: "With fried onion", desc_de: "Mit gebratenen Zwiebeln", price: 100, weight: "500 g", img: "https://i.ibb.co/xS68YCdK/image.png" },
-  { category_en: "Bread (All sourdough!)", category_de: "Brot (Alles Sauerteig!)", name_en: "Seeded", name_de: "Körnerbrot", desc_en: "Mix of healthy seeds", desc_de: "Mix aus gesunden Saaten", price: 100, weight: "500 g", img: "https://i.ibb.co/C3gpbwWW/IMG-5178.jpg" },
+  { category_en: "Bread (All sourdough!)", category_de: "Brot (Alles Sauerteig!)", name_en: "Seeded", name_de: "Körnerbrot", desc_en: "Mix of healthy seeds", desc_de: "Mix aus gesunden Saaten", price: 100, weight: "500 g", img: "https://i.ibb.co/C3gpbwWW/IMG-5181.jpg" },
   { category_en: "Bread (All sourdough!)", category_de: "Brot (Alles Sauerteig!)", name_en: "Carrot & raisin", name_de: "Karotte & Rosinen", desc_en: "Slightly sweet crumb", desc_de: "Leicht süße Krume", price: 100, weight: "450 g", img: "https://i.ibb.co/rRqG8hMq/image.jpg" },
   { category_en: "Pies & Snacks", category_de: "Kuchen & Snacks", name_en: "Quiche with fish", name_de: "Quiche mit Fisch", desc_en: "Filling, red fish", desc_de: "Füllung, Rotfisch", price: 250, weight: "820 g", img: "https://i.ibb.co/d0MqgdZV/image.jpg" },
   { category_en: "Pies & Snacks", category_de: "Kuchen & Snacks", name_en: "Cabbage pie", name_de: "Kohlkuchen", desc_en: "Juicy filling", desc_de: "Saftige Füllung", price: 200, weight: "820 g", img: "https://i.ibb.co/7t8Cfs5M/IMG-5179.jpg" },
