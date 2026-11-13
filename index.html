@@ -17,7 +17,6 @@ header{position:sticky;top:0;background:#111;padding:12px 16px;display:flex;just
 .info-box h2{font-family:Georgia,serif;font-style:italic;font-size:28px;color:#E8C99A;margin:0 0 12px;line-height:1.2}
 .info-box p{margin:0 0 8px;color:#eee;font-size:16px;line-height:1.5}
 .delivery-box{margin-top:16px;background:#6B5638;border:1px dashed #D9C29A;border-radius:14px;padding:14px 10px;color:#FFF2D9;font-size:17px}
-/* ПОИСК ПЛАВАЮЩИЙ - БЕЗ СЕРОЙ ОБВОДКИ */
 .search-wrap{position:fixed;right:16px;bottom:92px;z-index:15;display:flex;align-items:center;gap:8px;background:#222;border:none;border-radius:30px;padding:6px;height:50px;width:min(340px,calc(100vw - 32px));transition:all .3s;overflow:hidden;box-shadow:0 6px 20px rgba(0,0,0,.4)}
 .search-wrap.collapsed{width:50px;padding:0;background:transparent;box-shadow:none}
 .search-wrap input{flex:1;background:transparent;border:0;outline:none;color:#fff;font-size:16px;min-width:0}
@@ -55,29 +54,23 @@ label{font-size:14px;color:#ddd}
 <div><b>🍞 Home Bread</b></div>
 <div class="lang"><button id="btn-en" onclick="setLang('en')">EN</button><button id="btn-de" onclick="setLang('de')">DE</button></div>
 </header>
-
 <div class="hero">
 <h1 id="t-title">Homemade bread on sourdough</h1>
 <p id="t-sub">Fresh from the oven • Gazipasa</p>
 </div>
-
 <div class="info-box">
   <h2 id="t-info-title">We bake to order</h2>
   <p id="t-info-1">We accept orders one day before the expected delivery.</p>
   <p id="t-info-2">On Saturday and Sunday we do not deliver bread, we accept orders for Monday and the following days.</p>
   <div class="delivery-box"><span id="t-delivery">🚗 Delivery from 16:00 - 17:00</span></div>
 </div>
-
 <div class="grid" id="grid"></div>
-
 <div class="search-wrap">
   <button id="searchBtn" onclick="openSearch()">🔍</button>
   <input id="search" placeholder="Search...">
   <button id="clearBtn" onclick="clearSearch()">✕</button>
 </div>
-
 <div class="cart"><div id="t-total" style="margin-bottom:8px">Total: 0 ₺</div><button id="t-checkout" onclick="openCart()">View cart & order</button></div>
-
 <div class="modal" id="modal"><div>
 <button class="close" onclick="closeCart()">×</button>
 <h2 id="t-your-order">Your order</h2>
@@ -90,7 +83,6 @@ label{font-size:14px;color:#ddd}
 <button id="t-send" onclick="sendOrder()" style="width:100%;background:#C9A86C;color:#fff;border:0;padding:14px;border-radius:12px;font-weight:800;font-size:16px">Send order</button>
 <div id="msg" style="margin-top:10px;color:#f87171"></div>
 </div></div>
-
 <script src="products.js"></script>
 <script>
 const T={
@@ -100,6 +92,9 @@ de:{title:"Hausgemachtes Brot mit Sauerteig",sub:"Frisch aus dem Ofen • Gazipa
 let lang=localStorage.getItem('lang')||'en';
 let cart={};
 const products=window.PRODUCTS||[];
+function pName(p){return (lang==='de'?(p.name_de||p.name||'' ):(p.name_en||p.name||''))||'';}
+function pDesc(p){return (lang==='de'?(p.desc_de||p.desc||'' ):(p.desc_en||p.desc||''))||'';}
+function pCat(p){return (lang==='de'?(p.category_de||p.category||'' ):(p.category_en||p.category||''))||'';}
 function setLang(l){lang=l;localStorage.setItem('lang',l);applyLang();render();}
 function applyLang(){
 const t=T[lang];
@@ -122,7 +117,7 @@ document.getElementById('btn-en').className=lang==='en'?'active':'';
 document.getElementById('btn-de').className=lang==='de'?'active':'';
 updateTotal();
 }
-function getTotal(){let s=0;for(let k in cart)s+=products[k].price*cart[k];return s;}
+function getTotal(){let s=0;for(let k in cart)s+=Number(products[k].price||0)*cart[k];return s;}
 function updateTotal(){
 const s=getTotal();
 document.getElementById('t-total').textContent=T[lang].total+s+' ₺';
@@ -133,9 +128,9 @@ const q=(document.getElementById('search').value||'').toLowerCase();
 const grid=document.getElementById('grid');grid.innerHTML='';
 let lastCat='';
 products.forEach((p,i)=>{
-const name=lang==='de'?p.name_de:p.name_en;
-const desc=lang==='de'?p.desc_de:p.desc_en;
-const cat=lang==='de'?p.category_de:p.category_en;
+const name=pName(p);
+const desc=pDesc(p);
+const cat=pCat(p);
 if(!name.toLowerCase().includes(q)&&!desc.toLowerCase().includes(q))return;
 if(cat!==lastCat){lastCat=cat;const d=document.createElement('div');d.className='cat';d.textContent=cat;grid.appendChild(d);}
 const qty=cart[i]||0;
@@ -143,7 +138,7 @@ const c=document.createElement('div');c.className='card';
 let qtyHtml='';
 if(qty===0){qtyHtml=`<button class="add" onclick="changeQty(${i},1)">${T[lang].add}</button>`;}
 else{qtyHtml=`<div class="qty"><button onclick="changeQty(${i},-1)">−</button><span>${qty}</span><button class="plus" onclick="changeQty(${i},1)">+</button></div>`;}
-c.innerHTML=`<img src="${p.img}"><b>${name}</b><p>${desc} • ${p.weight}</p><div class="price-row"><span>${p.price} ₺</span>${qtyHtml}</div>`;
+c.innerHTML=`<img src="${p.img||''}"><b>${name}</b><p>${desc} • ${p.weight||''}</p><div class="price-row"><span>${p.price} ₺</span>${qtyHtml}</div>`;
 grid.appendChild(c);
 });
 updateTotal();
@@ -157,7 +152,7 @@ if(document.getElementById('modal').style.display==='block')openCart();
 function openCart(){
 const el=document.getElementById('cart-items');el.innerHTML='';
 let has=false;
-for(let k in cart){has=true;const p=products[k];const name=lang==='de'?p.name_de:p.name_en;
+for(let k in cart){has=true;const p=products[k];const name=pName(p);
 el.innerHTML+=`<div class="cart-row"><span class="p-name">${name}</span><div class="qty"><button onclick="changeQty(${k},-1)">−</button><span>${cart[k]}</span><button class="plus" onclick="changeQty(${k},1)">+</button></div><span class="p-price">${p.price*cart[k]} ₺</span></div>`;}
 if(!has)el.innerHTML=T[lang].empty;
 updateTotal();document.getElementById('modal').style.display='block';
@@ -169,6 +164,22 @@ const phone=document.getElementById('phone').value.trim();
 const address=document.getElementById('address').value.trim();
 const comment=document.getElementById('comment').value.trim();
 if(!name||!phone||!address||Object.keys(cart).length===0){document.getElementById('msg').textContent=T[lang].fill;return;}
-let items=[];for(let k in cart){const p=products[k];items.push({name:lang==='de'?p.name_de:p.name_en,qty:cart[k],price:p.price});}
+let items=[];for(let k in cart){const p=products[k];items.push({name:pName(p),qty:cart[k],price:p.price});}
 try{
-const r=await fetch('/api/send-order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,phone,address
+const r=await fetch('/api/send-order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,phone,address,comment,items,lang})});
+if(!r.ok)throw new Error('fail');
+cart={};render();closeCart();alert(T[lang].ok);
+}catch(e){document.getElementById('msg').textContent=T[lang].error;}
+}
+const wrap=document.querySelector('.search-wrap');
+const searchInput=document.getElementById('search');
+const clearBtn=document.getElementById('clearBtn');
+wrap.classList.add('collapsed');
+function openSearch(){wrap.classList.remove('collapsed');setTimeout(()=>searchInput.focus(),50);}
+searchInput.addEventListener('input',function(){if(this.value){clearBtn.classList.add('show');}else{clearBtn.classList.remove('show');}render();});
+function clearSearch(){searchInput.value='';clearBtn.classList.remove('show');render();wrap.classList.add('collapsed');window.scrollTo({top:0,behavior:'smooth'});}
+document.addEventListener('click',function(e){if(!wrap.contains(e.target) && !searchInput.value){wrap.classList.add('collapsed');}});
+applyLang();render();
+</script>
+</body>
+</html>
