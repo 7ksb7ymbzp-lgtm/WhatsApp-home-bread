@@ -5,19 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Home Bread - Homemade sourdough bread</title>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,sans-serif;background:#1a1a1a;color:#fff}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,sans-serif;background:#14100c;color:#fff}
 header{position:sticky;top:0;background:#111;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;z-index:10}
 .lang{display:flex;gap:6px}
 .lang button{background:#333;color:#fff;border:1px solid #555;padding:6px 12px;border-radius:20px;cursor:pointer}
 .lang button.active{background:#22c55e;border-color:#22c55e;color:#000;font-weight:700}
-h1{font-size:20px;margin:16px} .sub{color:#aaa;margin:0 16px 16px}
-.search{margin:0 16px 16px}.search input{width:100%;padding:12px;border-radius:12px;border:1px solid #333;background:#222;color:#fff;font-size:16px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px 120px}
+/* ВЕРНУЛИ ФОН-ХЛЕБ */
+.hero{background:linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.55)),url('https://images.unsplash.com/photo-1509440159596-0249088772ff?w=1200&q=80') center/cover;padding:42px 16px 30px;text-align:center}
+.hero h1{font-size:26px;margin:0 0 8px;text-shadow:0 2px 10px #000}
+.hero p{color:#eee;margin:0}
+.search{margin:16px}.search input{width:100%;padding:12px;border-radius:12px;border:1px solid #333;background:#222;color:#fff;font-size:16px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px 140px}
 .card{background:#222;border-radius:16px;overflow:hidden}
 .card img{width:100%;height:140px;object-fit:cover}
 .card b{display:block;padding:8px 10px 0}.card p{margin:4px 10px;color:#aaa;font-size:13px;min-height:36px}
-.price-row{display:flex;justify-content:space-between;align-items:center;padding:8px 10px 10px}
-.add{background:#22c55e;border:0;padding:8px 14px;border-radius:20px;font-weight:700;cursor:pointer}
+.price-row{display:flex;justify-content:space-between;align-items:center;padding:8px 10px 12px}
+.qty{display:flex;align-items:center;gap:8px}
+.qty button{width:30px;height:30px;border-radius:50%;border:0;background:#333;color:#fff;font-size:18px;cursor:pointer}
+.qty button.plus{background:#22c55e;color:#000;font-weight:800}
+.qty span{min-width:18px;text-align:center;font-weight:700}
 .cat{grid-column:1/-1;font-size:19px;font-weight:800;margin:14px 0 2px}
 .cart{position:fixed;bottom:0;left:0;right:0;background:#111;border-top:1px solid #333;padding:12px 16px}
 .cart button{width:100%;background:#22c55e;border:0;padding:14px;border-radius:12px;font-weight:800;font-size:16px;cursor:pointer}
@@ -26,6 +32,7 @@ h1{font-size:20px;margin:16px} .sub{color:#aaa;margin:0 16px 16px}
 input,textarea{width:100%;padding:12px;margin:6px 0 12px;border-radius:10px;border:1px solid #333;background:#222;color:#fff;font-size:16px}
 label{font-size:14px;color:#ddd}
 .close{float:right;background:none;border:0;color:#fff;font-size:22px;cursor:pointer}
+.cart-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #333;gap:8px}
 </style>
 </head>
 <body>
@@ -33,8 +40,12 @@ label{font-size:14px;color:#ddd}
 <div><b>🍞 Home Bread</b></div>
 <div class="lang"><button id="btn-en" onclick="setLang('en')">EN</button><button id="btn-de" onclick="setLang('de')">DE</button></div>
 </header>
+
+<div class="hero">
 <h1 id="t-title">Homemade bread on sourdough</h1>
-<p class="sub" id="t-sub">Fresh from the oven • Gazipasa • Order for tomorrow</p>
+<p id="t-sub">Fresh from the oven • Gazipasa • Order for tomorrow</p>
+</div>
+
 <div class="search"><input id="search" placeholder="Search..."></div>
 <div class="grid" id="grid"></div>
 <div class="cart"><div id="t-total" style="margin-bottom:8px">Total: 0 ₺</div><button id="t-checkout" onclick="openCart()">View cart & order</button></div>
@@ -59,7 +70,7 @@ en:{title:"Homemade bread on sourdough",sub:"Fresh from the oven • Gazipasa �
 de:{title:"Hausgemachtes Brot mit Sauerteig",sub:"Frisch aus dem Ofen • Gazipasa • Bestellung für morgen",search:"Suche...",total:"Gesamt: ",checkout:"Warenkorb & bestellen",yourOrder:"Ihre Bestellung",name:"Ihr Name *",phone:"Telefon *",address:"Adresse *",comment:"Kommentar zur Bestellung (Allergie, Wünsche)",commentPh:"z.B. Allergie gegen Karotten...",total2:"Zu zahlen: ",send:"Bestellung senden",add:"Hinzufügen",empty:"Warenkorb ist leer",fill:"Bitte Name, Telefon und Adresse ausfüllen",error:"Sendefehler, bitte erneut versuchen",ok:"Bestellung gesendet! Danke!"}
 };
 let lang=localStorage.getItem('lang')||'en';
-let cart={};
+let cart={}; // cart = { index: qty }
 const products=window.PRODUCTS||[];
 function setLang(l){lang=l;localStorage.setItem('lang',l);applyLang();render();}
 function applyLang(){
@@ -79,6 +90,13 @@ document.getElementById('btn-en').className=lang==='en'?'active':'';
 document.getElementById('btn-de').className=lang==='de'?'active':'';
 updateTotal();
 }
+// ИСПРАВЛЕННЫЙ ПОДСЧЕТ
+function getTotal(){let s=0;for(let k in cart)s+=products[k].price*cart[k];return s;}
+function updateTotal(){
+const s=getTotal();
+document.getElementById('t-total').textContent=T[lang].total+s+' ₺';
+document.getElementById('t-total2').textContent=T[lang].total2+s+' ₺';
+}
 function render(){
 const q=(document.getElementById('search').value||'').toLowerCase();
 const grid=document.getElementById('grid');grid.innerHTML='';
@@ -89,20 +107,28 @@ const desc=lang==='de'?p.desc_de:p.desc_en;
 const cat=lang==='de'?p.category_de:p.category_en;
 if(!name.toLowerCase().includes(q)&&!desc.toLowerCase().includes(q))return;
 if(cat!==lastCat){lastCat=cat;const d=document.createElement('div');d.className='cat';d.textContent=cat;grid.appendChild(d);}
+const qty=cart[i]||0;
 const c=document.createElement('div');c.className='card';
-c.innerHTML=`<img src="${p.img}"><b>${name}</b><p>${desc} • ${p.weight}</p><div class="price-row"><span>${p.price} ₺</span><button class="add" onclick="add(${i})">${T[lang].add}</button></div>`;
+let qtyHtml='';
+if(qty===0){qtyHtml=`<button class="add" onclick="changeQty(${i},1)" style="background:#22c55e;border:0;padding:8px 14px;border-radius:20px;font-weight:700;cursor:pointer">${T[lang].add}</button>`;}
+else{qtyHtml=`<div class="qty"><button onclick="changeQty(${i},-1)">−</button><span>${qty}</span><button class="plus" onclick="changeQty(${i},1)">+</button></div>`;}
+c.innerHTML=`<img src="${p.img}"><b>${name}</b><p>${desc} • ${p.weight}</p><div class="price-row"><span>${p.price} ₺</span>${qtyHtml}</div>`;
 grid.appendChild(c);
 });
+updateTotal();
 }
-function add(i){cart[i]=(cart[i]||0)+1;updateTotal();}
-function updateTotal(){
-let s=0;for(let k in cart)s+=products[k].price*cart[k];
-document.getElementById('t-total').textContent=T[lang].total+s+' ₺';
-document.getElementById('t-total2').textContent=T[lang].total2+s+' ₺';
+function changeQty(i,delta){
+cart[i]=(cart[i]||0)+delta;
+if(cart[i]<=0)delete cart[i];
+render();
+// если корзина открыта - обновить и её
+if(document.getElementById('modal').style.display==='block')openCart();
 }
 function openCart(){
 const el=document.getElementById('cart-items');el.innerHTML='';
-let has=false;for(let k in cart){has=true;const p=products[k];const name=lang==='de'?p.name_de:p.name_en;el.innerHTML+=`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #333"><span>${name} × ${cart[k]}</span><span>${p.price*cart[k]} ₺</span></div>`;}
+let has=false;
+for(let k in cart){has=true;const p=products[k];const name=lang==='de'?p.name_de:p.name_en;
+el.innerHTML+=`<div class="cart-row"><span>${name}</span><div class="qty"><button onclick="changeQty(${k},-1)">−</button><span>${cart[k]}</span><button class="plus" onclick="changeQty(${k},1)">+</button></div><span>${p.price*cart[k]} ₺</span></div>`;}
 if(!has)el.innerHTML=T[lang].empty;
 updateTotal();document.getElementById('modal').style.display='block';
 }
@@ -117,7 +143,7 @@ let items=[];for(let k in cart){const p=products[k];items.push({name:lang==='de'
 try{
 const r=await fetch('/api/send-order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,phone,address,comment,items,lang})});
 if(!r.ok)throw new Error('fail');
-cart={};updateTotal();closeCart();alert(T[lang].ok);
+cart={};render();closeCart();alert(T[lang].ok);
 }catch(e){document.getElementById('msg').textContent=T[lang].error;}
 }
 document.getElementById('search').addEventListener('input',render);
