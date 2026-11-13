@@ -17,7 +17,15 @@ header{position:sticky;top:0;background:#111;padding:12px 16px;display:flex;just
 .info-box h2{font-family:Georgia,serif;font-style:italic;font-size:28px;color:#E8C99A;margin:0 0 12px;line-height:1.2}
 .info-box p{margin:0 0 8px;color:#eee;font-size:16px;line-height:1.5}
 .delivery-box{margin-top:16px;background:#6B5638;border:1px dashed #D9C29A;border-radius:14px;padding:14px 10px;color:#FFF2D9;font-size:17px}
-.search{margin:16px}.search input{width:100%;padding:12px;border-radius:12px;border:1px solid #333;background:#222;color:#fff;font-size:16px}
+/* ПОИСК - ЛУПА / КРЕСТИК */
+.search-wrap{display:flex;align-items:center;gap:8px;margin:16px;background:#222;border:1px solid #333;border-radius:30px;padding:6px;height:48px;transition:all .3s;overflow:hidden}
+.search-wrap input{flex:1;background:transparent;border:0;outline:none;color:#fff;font-size:16px;min-width:0}
+.search-wrap button{border:0;cursor:pointer;flex-shrink:0}
+#searchBtn{background:transparent;font-size:20px;width:36px;height:36px}
+#clearBtn{background:#C9A86C;color:#fff;width:28px;height:28px;border-radius:50%;font-size:14px;opacity:0;transform:scale(0) rotate(-90deg);pointer-events:none;transition:all .25s ease}
+#clearBtn.show{opacity:1;transform:scale(1) rotate(0deg);pointer-events:auto}
+.search-wrap.collapsed{width:48px;padding:6px}
+.search-wrap.collapsed input,.search-wrap.collapsed #clearBtn{display:none}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px 140px}
 .card{background:#222;border-radius:16px;overflow:hidden}
 .card img{width:100%;height:140px;object-fit:cover}
@@ -50,7 +58,7 @@ label{font-size:14px;color:#ddd}
 
 <div class="hero">
 <h1 id="t-title">Homemade bread on sourdough</h1>
-<p id="t-sub">Fresh from the oven • Gazipasa • Order for tomorrow</p>
+<p id="t-sub">Fresh from the oven • Gazipasa</p>
 </div>
 
 <div class="info-box">
@@ -60,7 +68,12 @@ label{font-size:14px;color:#ddd}
   <div class="delivery-box"><span id="t-delivery">🚗 Delivery from 16:00 - 17:00</span></div>
 </div>
 
-<div class="search"><input id="search" placeholder="Search..."></div>
+<div class="search-wrap">
+  <button id="searchBtn" onclick="openSearch()">🔍</button>
+  <input id="search" placeholder="Search...">
+  <button id="clearBtn" onclick="clearSearch()">✕</button>
+</div>
+
 <div class="grid" id="grid"></div>
 <div class="cart"><div id="t-total" style="margin-bottom:8px">Total: 0 ₺</div><button id="t-checkout" onclick="openCart()">View cart & order</button></div>
 
@@ -80,8 +93,8 @@ label{font-size:14px;color:#ddd}
 <script src="products.js"></script>
 <script>
 const T={
-en:{title:"Homemade bread on sourdough",sub:"Fresh from the oven • Gazipasa • Order for tomorrow",infoTitle:"We bake to order",info1:"We accept orders one day before the expected delivery.",info2:"On Saturday and Sunday we do not deliver bread, we accept orders for Monday and the following days.",delivery:"🚗 Delivery from 16:00 - 17:00",search:"Search...",total:"Total: ",checkout:"View cart & order",yourOrder:"Your order",name:"Your name *",phone:"Phone *",address:"Address *",comment:"Order comment (allergy, wishes)",commentPh:"e.g. allergy to carrots...",total2:"Total to pay: ",send:"Send order",add:"Add",empty:"Cart is empty",fill:"Please fill in name, phone and address",error:"Send error, please try again",ok:"Order sent! Thank you!"},
-de:{title:"Hausgemachtes Brot mit Sauerteig",sub:"Frisch aus dem Ofen • Gazipasa • Bestellung für morgen",infoTitle:"Wir backen auf Bestellung",info1:"Wir nehmen Bestellungen einen Tag vor der erwarteten Lieferung an.",info2:"Am Samstag und Sonntag liefern wir kein Brot, wir nehmen Bestellungen für Montag und die folgenden Tage an.",delivery:"🚗 Lieferung von 16:00 - 17:00 Uhr",search:"Suche...",total:"Gesamt: ",checkout:"Warenkorb & bestellen",yourOrder:"Ihre Bestellung",name:"Ihr Name *",phone:"Telefon *",address:"Adresse *",comment:"Kommentar zur Bestellung (Allergie, Wünsche)",commentPh:"z.B. Allergie gegen Karotten...",total2:"Zu zahlen: ",send:"Bestellung senden",add:"Hinzufügen",empty:"Warenkorb ist leer",fill:"Bitte Name, Telefon und Adresse ausfüllen",error:"Sendefehler, bitte erneut versuchen",ok:"Bestellung gesendet! Danke!"}
+en:{title:"Homemade bread on sourdough",sub:"Fresh from the oven • Gazipasa",infoTitle:"We bake to order",info1:"We accept orders one day before the expected delivery.",info2:"On Saturday and Sunday we do not deliver bread, we accept orders for Monday and the following days.",delivery:"🚗 Delivery from 16:00 - 17:00",search:"Search...",total:"Total: ",checkout:"View cart & order",yourOrder:"Your order",name:"Your name *",phone:"Phone *",address:"Address *",comment:"Order comment (allergy, wishes)",commentPh:"e.g. allergy to carrots...",total2:"Total to pay: ",send:"Send order",add:"Add",empty:"Cart is empty",fill:"Please fill in name, phone and address",error:"Send error, please try again",ok:"Order sent! Thank you!"},
+de:{title:"Hausgemachtes Brot mit Sauerteig",sub:"Frisch aus dem Ofen • Gazipasa",infoTitle:"Wir backen auf Bestellung",info1:"Wir nehmen Bestellungen einen Tag vor der erwarteten Lieferung an.",info2:"Am Samstag und Sonntag liefern wir kein Brot, wir nehmen Bestellungen für Montag und die folgenden Tage an.",delivery:"🚗 Lieferung von 16:00 - 17:00 Uhr",search:"Suche...",total:"Gesamt: ",checkout:"Warenkorb & bestellen",yourOrder:"Ihre Bestellung",name:"Ihr Name *",phone:"Telefon *",address:"Adresse *",comment:"Kommentar zur Bestellung (Allergie, Wünsche)",commentPh:"z.B. Allergie gegen Karotten...",total2:"Zu zahlen: ",send:"Bestellung senden",add:"Hinzufügen",empty:"Warenkorb ist leer",fill:"Bitte Name, Telefon und Adresse ausfüllen",error:"Sendefehler, bitte erneut versuchen",ok:"Bestellung gesendet! Danke!"}
 };
 let lang=localStorage.getItem('lang')||'en';
 let cart={};
@@ -129,4 +142,65 @@ const c=document.createElement('div');c.className='card';
 let qtyHtml='';
 if(qty===0){qtyHtml=`<button class="add" onclick="changeQty(${i},1)">${T[lang].add}</button>`;}
 else{qtyHtml=`<div class="qty"><button onclick="changeQty(${i},-1)">−</button><span>${qty}</span><button class="plus" onclick="changeQty(${i},1)">+</button></div>`;}
-c.innerHTML=`<img src="${p.img}"><b>${name}</b><p>${desc} •
+c.innerHTML=`<img src="${p.img}"><b>${name}</b><p>${desc} • ${p.weight}</p><div class="price-row"><span>${p.price} ₺</span>${qtyHtml}</div>`;
+grid.appendChild(c);
+});
+updateTotal();
+}
+function changeQty(i,delta){
+cart[i]=(cart[i]||0)+delta;
+if(cart[i]<=0)delete cart[i];
+render();
+if(document.getElementById('modal').style.display==='block')openCart();
+}
+function openCart(){
+const el=document.getElementById('cart-items');el.innerHTML='';
+let has=false;
+for(let k in cart){has=true;const p=products[k];const name=lang==='de'?p.name_de:p.name_en;
+el.innerHTML+=`<div class="cart-row"><span class="p-name">${name}</span><div class="qty"><button onclick="changeQty(${k},-1)">−</button><span>${cart[k]}</span><button class="plus" onclick="changeQty(${k},1)">+</button></div><span class="p-price">${p.price*cart[k]} ₺</span></div>`;}
+if(!has)el.innerHTML=T[lang].empty;
+updateTotal();document.getElementById('modal').style.display='block';
+}
+function closeCart(){document.getElementById('modal').style.display='none';}
+async function sendOrder(){
+const name=document.getElementById('name').value.trim();
+const phone=document.getElementById('phone').value.trim();
+const address=document.getElementById('address').value.trim();
+const comment=document.getElementById('comment').value.trim();
+if(!name||!phone||!address||Object.keys(cart).length===0){document.getElementById('msg').textContent=T[lang].fill;return;}
+let items=[];for(let k in cart){const p=products[k];items.push({name:lang==='de'?p.name_de:p.name_en,qty:cart[k],price:p.price});}
+try{
+const r=await fetch('/api/send-order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,phone,address,comment,items,lang})});
+if(!r.ok)throw new Error('fail');
+cart={};render();closeCart();alert(T[lang].ok);
+}catch(e){document.getElementById('msg').textContent=T[lang].error;}
+}
+// ПОИСК - ЛУПА / КРЕСТИК
+const wrap=document.querySelector('.search-wrap');
+const searchInput=document.getElementById('search');
+const clearBtn=document.getElementById('clearBtn');
+wrap.classList.add('collapsed');
+function openSearch(){
+  wrap.classList.remove('collapsed');
+  setTimeout(()=>searchInput.focus(),50);
+}
+searchInput.addEventListener('input',function(){
+  if(this.value){clearBtn.classList.add('show');}else{clearBtn.classList.remove('show');}
+  render();
+});
+function clearSearch(){
+  searchInput.value='';
+  clearBtn.classList.remove('show');
+  render();
+  wrap.classList.add('collapsed');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.addEventListener('click',function(e){
+  if(!wrap.contains(e.target) && !searchInput.value){
+    wrap.classList.add('collapsed');
+  }
+});
+applyLang();render();
+</script>
+</body>
+</html>
