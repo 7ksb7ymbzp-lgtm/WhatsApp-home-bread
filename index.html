@@ -17,14 +17,14 @@ header{position:sticky;top:0;background:#111;padding:12px 16px;display:flex;just
 .info-box h2{font-family:Georgia,serif;font-style:italic;font-size:28px;color:#E8C99A;margin:0 0 12px;line-height:1.2}
 .info-box p{margin:0 0 8px;color:#eee;font-size:16px;line-height:1.5}
 .delivery-box{margin-top:16px;background:#6B5638;border:1px dashed #D9C29A;border-radius:14px;padding:14px 10px;color:#FFF2D9;font-size:17px}
-/* ПОИСК ПЛАВАЮЩИЙ - ПРАВЫЙ НИЖНИЙ УГОЛ */
-.search-wrap{position:fixed;right:16px;bottom:92px;z-index:15;display:flex;align-items:center;gap:8px;background:#222;border:1px solid #555;border-radius:30px;padding:6px;height:50px;width:min(340px,calc(100vw - 32px));transition:all .3s;overflow:hidden;box-shadow:0 6px 20px rgba(0,0,0,.5)}
+/* ПОИСК ПЛАВАЮЩИЙ - БЕЗ СЕРОЙ ОБВОДКИ */
+.search-wrap{position:fixed;right:16px;bottom:92px;z-index:15;display:flex;align-items:center;gap:8px;background:#222;border:none;border-radius:30px;padding:6px;height:50px;width:min(340px,calc(100vw - 32px));transition:all .3s;overflow:hidden;box-shadow:0 6px 20px rgba(0,0,0,.4)}
+.search-wrap.collapsed{width:50px;padding:0;background:transparent;box-shadow:none}
 .search-wrap input{flex:1;background:transparent;border:0;outline:none;color:#fff;font-size:16px;min-width:0}
-.search-wrap button{border:0;cursor:pointer;flex-shrink:0}
-#searchBtn{background:#C9A86C;font-size:20px;width:38px;height:38px;border-radius:50%;line-height:1}
+.search-wrap button{border:0;cursor:pointer;flex-shrink:0;outline:none}
+#searchBtn{background:#C9A86C;font-size:20px;width:50px;height:50px;border-radius:50%;line-height:1;box-shadow:0 4px 14px rgba(0,0,0,.4)}
 #clearBtn{background:#C9A86C;color:#fff;width:28px;height:28px;border-radius:50%;font-size:14px;opacity:0;transform:scale(0) rotate(-90deg);pointer-events:none;transition:all .25s ease}
 #clearBtn.show{opacity:1;transform:scale(1) rotate(0deg);pointer-events:auto}
-.search-wrap.collapsed{width:50px;padding:6px}
 .search-wrap.collapsed input,.search-wrap.collapsed #clearBtn{display:none}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px 140px}
 .card{background:#222;border-radius:16px;overflow:hidden}
@@ -171,36 +171,4 @@ const comment=document.getElementById('comment').value.trim();
 if(!name||!phone||!address||Object.keys(cart).length===0){document.getElementById('msg').textContent=T[lang].fill;return;}
 let items=[];for(let k in cart){const p=products[k];items.push({name:lang==='de'?p.name_de:p.name_en,qty:cart[k],price:p.price});}
 try{
-const r=await fetch('/api/send-order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,phone,address,comment,items,lang})});
-if(!r.ok)throw new Error('fail');
-cart={};render();closeCart();alert(T[lang].ok);
-}catch(e){document.getElementById('msg').textContent=T[lang].error;}
-}
-const wrap=document.querySelector('.search-wrap');
-const searchInput=document.getElementById('search');
-const clearBtn=document.getElementById('clearBtn');
-wrap.classList.add('collapsed');
-function openSearch(){
-  wrap.classList.remove('collapsed');
-  setTimeout(()=>searchInput.focus(),50);
-}
-searchInput.addEventListener('input',function(){
-  if(this.value){clearBtn.classList.add('show');}else{clearBtn.classList.remove('show');}
-  render();
-});
-function clearSearch(){
-  searchInput.value='';
-  clearBtn.classList.remove('show');
-  render();
-  wrap.classList.add('collapsed');
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-document.addEventListener('click',function(e){
-  if(!wrap.contains(e.target) && !searchInput.value){
-    wrap.classList.add('collapsed');
-  }
-});
-applyLang();render();
-</script>
-</body>
-</html>
+const r=await fetch('/api/send-order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,phone,address
