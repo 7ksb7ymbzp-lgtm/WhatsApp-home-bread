@@ -1,5 +1,5 @@
 // products.js - EDIT ONLY THIS FILE
-// price - меняй только цифру
+// To change price - change only price: 100
 window.PRODUCTS = [
   { category_en: "Bread (All sourdough!)", category_de: "Brot (Alles Sauerteig!)", name_en: "Darnitsky", name_de: "Darnizki", desc_en: "Classic rye-wheat", desc_de: "Klassisches Roggen-Weizen", price: 100, weight: "500 g", img: "https://i.ibb.co/mV675qBf/image.jpg" },
   { category_en: "Bread (All sourdough!)", category_de: "Brot (Alles Sauerteig!)", name_en: "Rye", name_de: "Roggenbrot", desc_en: "Natural sourdough", desc_de: "Natürlicher Sauerteig", price: 100, weight: "500 g", img: "https://i.ibb.co/kgnWr2qp/image.jpg" },
