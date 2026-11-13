@@ -9,11 +9,14 @@
 header{position:sticky;top:0;background:#111;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;z-index:10}
 .lang{display:flex;gap:6px}
 .lang button{background:#333;color:#fff;border:1px solid #555;padding:6px 12px;border-radius:20px;cursor:pointer}
-.lang button.active{background:#22c55e;border-color:#22c55e;color:#000;font-weight:700}
-/* ВЕРНУЛИ ФОН-ХЛЕБ */
+.lang button.active{background:#C9A86C;border-color:#C9A86C;color:#fff;font-weight:700}
 .hero{background:linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.55)),url('https://images.unsplash.com/photo-1509440159596-0249088772ff?w=1200&q=80') center/cover;padding:42px 16px 30px;text-align:center}
 .hero h1{font-size:26px;margin:0 0 8px;text-shadow:0 2px 10px #000}
 .hero p{color:#eee;margin:0}
+.info-box{background:rgba(30,22,18,.85);border:1px solid rgba(255,255,255,.25);border-radius:22px;margin:16px;padding:22px 18px;text-align:center;backdrop-filter:blur(4px)}
+.info-box h2{font-family:Georgia,serif;font-style:italic;font-size:28px;color:#E8C99A;margin:0 0 12px;line-height:1.2}
+.info-box p{margin:0 0 8px;color:#eee;font-size:16px;line-height:1.5}
+.delivery-box{margin-top:16px;background:#6B5638;border:1px dashed #D9C29A;border-radius:14px;padding:14px 10px;color:#FFF2D9;font-size:17px}
 .search{margin:16px}.search input{width:100%;padding:12px;border-radius:12px;border:1px solid #333;background:#222;color:#fff;font-size:16px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px 140px}
 .card{background:#222;border-radius:16px;overflow:hidden}
@@ -21,18 +24,22 @@ header{position:sticky;top:0;background:#111;padding:12px 16px;display:flex;just
 .card b{display:block;padding:8px 10px 0}.card p{margin:4px 10px;color:#aaa;font-size:13px;min-height:36px}
 .price-row{display:flex;justify-content:space-between;align-items:center;padding:8px 10px 12px}
 .qty{display:flex;align-items:center;gap:8px}
-.qty button{width:30px;height:30px;border-radius:50%;border:0;background:#333;color:#fff;font-size:18px;cursor:pointer}
-.qty button.plus{background:#22c55e;color:#000;font-weight:800}
+.qty button{width:30px;height:30px;border-radius:50%;border:0;background:#444;color:#fff;font-size:18px;cursor:pointer;flex-shrink:0}
+.qty button.plus{background:#C9A86C;color:#fff;font-weight:800}
 .qty span{min-width:18px;text-align:center;font-weight:700}
+.add{background:#C9A86C;color:#fff;border:0;padding:8px 14px;border-radius:20px;font-weight:700;cursor:pointer}
 .cat{grid-column:1/-1;font-size:19px;font-weight:800;margin:14px 0 2px}
 .cart{position:fixed;bottom:0;left:0;right:0;background:#111;border-top:1px solid #333;padding:12px 16px}
-.cart button{width:100%;background:#22c55e;border:0;padding:14px;border-radius:12px;font-weight:800;font-size:16px;cursor:pointer}
+.cart button{width:100%;background:#C9A86C;color:#fff;border:0;padding:14px;border-radius:12px;font-weight:800;font-size:16px;cursor:pointer}
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:20;overflow:auto}
 .modal>div{background:#1a1a1a;margin:20px auto;max-width:480px;padding:20px;border-radius:16px}
 input,textarea{width:100%;padding:12px;margin:6px 0 12px;border-radius:10px;border:1px solid #333;background:#222;color:#fff;font-size:16px}
 label{font-size:14px;color:#ddd}
 .close{float:right;background:none;border:0;color:#fff;font-size:22px;cursor:pointer}
-.cart-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #333;gap:8px}
+.cart-row{display:grid;grid-template-columns:1fr 110px 70px;align-items:center;padding:12px 0;border-bottom:1px solid #333;gap:8px}
+.cart-row .p-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cart-row .qty{justify-content:center}
+.cart-row .p-price{text-align:right;font-weight:700;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -44,6 +51,13 @@ label{font-size:14px;color:#ddd}
 <div class="hero">
 <h1 id="t-title">Homemade bread on sourdough</h1>
 <p id="t-sub">Fresh from the oven • Gazipasa • Order for tomorrow</p>
+</div>
+
+<div class="info-box">
+  <h2 id="t-info-title">We bake to order</h2>
+  <p id="t-info-1">We accept orders one day before the expected delivery.</p>
+  <p id="t-info-2">On Saturday and Sunday we do not deliver bread, we accept orders for Monday and the following days.</p>
+  <div class="delivery-box"><span id="t-delivery">🚗 Delivery from 16:00 - 17:00</span></div>
 </div>
 
 <div class="search"><input id="search" placeholder="Search..."></div>
@@ -59,24 +73,28 @@ label{font-size:14px;color:#ddd}
 <label id="t-address">Address *</label><input id="address" placeholder="Street, house, apartment">
 <label id="t-comment">Order comment (allergy, wishes)</label><textarea id="comment" placeholder="e.g. allergy to carrots..."></textarea>
 <div id="t-total2" style="font-weight:800;margin:10px 0">Total to pay: 0 ₺</div>
-<button id="t-send" onclick="sendOrder()" style="width:100%;background:#22c55e;border:0;padding:14px;border-radius:12px;font-weight:800;font-size:16px">Send order</button>
+<button id="t-send" onclick="sendOrder()" style="width:100%;background:#C9A86C;color:#fff;border:0;padding:14px;border-radius:12px;font-weight:800;font-size:16px">Send order</button>
 <div id="msg" style="margin-top:10px;color:#f87171"></div>
 </div></div>
 
 <script src="products.js"></script>
 <script>
 const T={
-en:{title:"Homemade bread on sourdough",sub:"Fresh from the oven • Gazipasa • Order for tomorrow",search:"Search...",total:"Total: ",checkout:"View cart & order",yourOrder:"Your order",name:"Your name *",phone:"Phone *",address:"Address *",comment:"Order comment (allergy, wishes)",commentPh:"e.g. allergy to carrots...",total2:"Total to pay: ",send:"Send order",add:"Add",empty:"Cart is empty",fill:"Please fill in name, phone and address",error:"Send error, please try again",ok:"Order sent! Thank you!"},
-de:{title:"Hausgemachtes Brot mit Sauerteig",sub:"Frisch aus dem Ofen • Gazipasa • Bestellung für morgen",search:"Suche...",total:"Gesamt: ",checkout:"Warenkorb & bestellen",yourOrder:"Ihre Bestellung",name:"Ihr Name *",phone:"Telefon *",address:"Adresse *",comment:"Kommentar zur Bestellung (Allergie, Wünsche)",commentPh:"z.B. Allergie gegen Karotten...",total2:"Zu zahlen: ",send:"Bestellung senden",add:"Hinzufügen",empty:"Warenkorb ist leer",fill:"Bitte Name, Telefon und Adresse ausfüllen",error:"Sendefehler, bitte erneut versuchen",ok:"Bestellung gesendet! Danke!"}
+en:{title:"Homemade bread on sourdough",sub:"Fresh from the oven • Gazipasa • Order for tomorrow",infoTitle:"We bake to order",info1:"We accept orders one day before the expected delivery.",info2:"On Saturday and Sunday we do not deliver bread, we accept orders for Monday and the following days.",delivery:"🚗 Delivery from 16:00 - 17:00",search:"Search...",total:"Total: ",checkout:"View cart & order",yourOrder:"Your order",name:"Your name *",phone:"Phone *",address:"Address *",comment:"Order comment (allergy, wishes)",commentPh:"e.g. allergy to carrots...",total2:"Total to pay: ",send:"Send order",add:"Add",empty:"Cart is empty",fill:"Please fill in name, phone and address",error:"Send error, please try again",ok:"Order sent! Thank you!"},
+de:{title:"Hausgemachtes Brot mit Sauerteig",sub:"Frisch aus dem Ofen • Gazipasa • Bestellung für morgen",infoTitle:"Wir backen auf Bestellung",info1:"Wir nehmen Bestellungen einen Tag vor der erwarteten Lieferung an.",info2:"Am Samstag und Sonntag liefern wir kein Brot, wir nehmen Bestellungen für Montag und die folgenden Tage an.",delivery:"🚗 Lieferung von 16:00 - 17:00 Uhr",search:"Suche...",total:"Gesamt: ",checkout:"Warenkorb & bestellen",yourOrder:"Ihre Bestellung",name:"Ihr Name *",phone:"Telefon *",address:"Adresse *",comment:"Kommentar zur Bestellung (Allergie, Wünsche)",commentPh:"z.B. Allergie gegen Karotten...",total2:"Zu zahlen: ",send:"Bestellung senden",add:"Hinzufügen",empty:"Warenkorb ist leer",fill:"Bitte Name, Telefon und Adresse ausfüllen",error:"Sendefehler, bitte erneut versuchen",ok:"Bestellung gesendet! Danke!"}
 };
 let lang=localStorage.getItem('lang')||'en';
-let cart={}; // cart = { index: qty }
+let cart={};
 const products=window.PRODUCTS||[];
 function setLang(l){lang=l;localStorage.setItem('lang',l);applyLang();render();}
 function applyLang(){
 const t=T[lang];
 document.getElementById('t-title').textContent=t.title;
 document.getElementById('t-sub').textContent=t.sub;
+document.getElementById('t-info-title').textContent=t.infoTitle;
+document.getElementById('t-info-1').textContent=t.info1;
+document.getElementById('t-info-2').textContent=t.info2;
+document.getElementById('t-delivery').textContent=t.delivery;
 document.getElementById('search').placeholder=t.search;
 document.getElementById('t-checkout').textContent=t.checkout;
 document.getElementById('t-your-order').textContent=t.yourOrder;
@@ -90,7 +108,6 @@ document.getElementById('btn-en').className=lang==='en'?'active':'';
 document.getElementById('btn-de').className=lang==='de'?'active':'';
 updateTotal();
 }
-// ИСПРАВЛЕННЫЙ ПОДСЧЕТ
 function getTotal(){let s=0;for(let k in cart)s+=products[k].price*cart[k];return s;}
 function updateTotal(){
 const s=getTotal();
@@ -110,44 +127,6 @@ if(cat!==lastCat){lastCat=cat;const d=document.createElement('div');d.className=
 const qty=cart[i]||0;
 const c=document.createElement('div');c.className='card';
 let qtyHtml='';
-if(qty===0){qtyHtml=`<button class="add" onclick="changeQty(${i},1)" style="background:#22c55e;border:0;padding:8px 14px;border-radius:20px;font-weight:700;cursor:pointer">${T[lang].add}</button>`;}
+if(qty===0){qtyHtml=`<button class="add" onclick="changeQty(${i},1)">${T[lang].add}</button>`;}
 else{qtyHtml=`<div class="qty"><button onclick="changeQty(${i},-1)">−</button><span>${qty}</span><button class="plus" onclick="changeQty(${i},1)">+</button></div>`;}
-c.innerHTML=`<img src="${p.img}"><b>${name}</b><p>${desc} • ${p.weight}</p><div class="price-row"><span>${p.price} ₺</span>${qtyHtml}</div>`;
-grid.appendChild(c);
-});
-updateTotal();
-}
-function changeQty(i,delta){
-cart[i]=(cart[i]||0)+delta;
-if(cart[i]<=0)delete cart[i];
-render();
-// если корзина открыта - обновить и её
-if(document.getElementById('modal').style.display==='block')openCart();
-}
-function openCart(){
-const el=document.getElementById('cart-items');el.innerHTML='';
-let has=false;
-for(let k in cart){has=true;const p=products[k];const name=lang==='de'?p.name_de:p.name_en;
-el.innerHTML+=`<div class="cart-row"><span>${name}</span><div class="qty"><button onclick="changeQty(${k},-1)">−</button><span>${cart[k]}</span><button class="plus" onclick="changeQty(${k},1)">+</button></div><span>${p.price*cart[k]} ₺</span></div>`;}
-if(!has)el.innerHTML=T[lang].empty;
-updateTotal();document.getElementById('modal').style.display='block';
-}
-function closeCart(){document.getElementById('modal').style.display='none';}
-async function sendOrder(){
-const name=document.getElementById('name').value.trim();
-const phone=document.getElementById('phone').value.trim();
-const address=document.getElementById('address').value.trim();
-const comment=document.getElementById('comment').value.trim();
-if(!name||!phone||!address||Object.keys(cart).length===0){document.getElementById('msg').textContent=T[lang].fill;return;}
-let items=[];for(let k in cart){const p=products[k];items.push({name:lang==='de'?p.name_de:p.name_en,qty:cart[k],price:p.price});}
-try{
-const r=await fetch('/api/send-order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,phone,address,comment,items,lang})});
-if(!r.ok)throw new Error('fail');
-cart={};render();closeCart();alert(T[lang].ok);
-}catch(e){document.getElementById('msg').textContent=T[lang].error;}
-}
-document.getElementById('search').addEventListener('input',render);
-applyLang();render();
-</script>
-</body>
-</html>
+c.innerHTML=`<img src="${p.img}"><b>${name}</b><p>${desc} •
