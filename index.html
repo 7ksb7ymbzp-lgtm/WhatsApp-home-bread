@@ -6,7 +6,7 @@
     <title>Hlebnitsa — Baked to Order</title>
     <style>
         :root { color-scheme: dark; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #2c221e; background-image: linear-gradient(rgba(44,34,30,0.85), rgba(44,34,30,0.95)), url('https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=1000&auto=format&fit=crop'); background-repeat: no-repeat; background-position: center center; background-attachment: fixed; background-size: cover; color: #fcf8f2; margin: 0; padding: 10px; padding-bottom: 180px; font-size: 16px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #2c221e; background-image: linear-gradient(rgba(44,34,30,0.85), rgba(44,34,30,0.95)), url('https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=1000&auto=format&fit=crop'); background-repeat: no-repeat; background-position: center center; background-attachment: fixed; background-size: cover; color: #fcf8f2; margin: 0; padding: 6px; padding-bottom: 180px; font-size: 16px; }
         header { text-align: center; margin-bottom: 20px; padding: 20px; background: rgba(255,255,255,0.08); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.15); border-radius: 18px; box-shadow: 0 8px 32px 0 rgba(0,0,0,0.3); }
         header h1 { font-size: 32px; margin: 0 0 10px 0; font-family: Georgia, serif; font-style: italic; color: #ffcc99; }
         header p { font-size: 17px; color: #e6dfd5; margin: 8px 0; line-height: 1.5; }
@@ -23,18 +23,18 @@
         .suggestion-img { width: 45px; height: 45px; border-radius: 8px; object-fit: cover; margin-right: 12px; }
         .category-title { font-size: 22px; font-family: Georgia, serif; font-style: italic; color: #ffcc99; margin: 28px 0 14px 4px; border-bottom: 1px solid rgba(255,204,153,0.2); padding-bottom: 8px; }
 
-        /* --- 2 СТОЛБИКА ВСЕГДА --- */
+        /* --- 2 СТОЛБИКА ВСЕГДА, ДАЖЕ В УЗКОМ ОКНЕ --- */
         #catalog-container { width: 100%; }
-        .catalog-grid { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 10px !important; width: 100%; }
-        .card { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 10px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 4px 15px rgba(0,0,0,0.2); min-width: 0; width: 100%; box-sizing: border-box; overflow: hidden; }
-        .card-img { width: 100%; height: 115px; border-radius: 10px; object-fit: cover; margin-bottom: 10px; }
-        .card-title { margin: 0 0 6px 0; font-size: 16px; font-weight: 700; color: #ffffff; line-height: 1.2; word-break: break-word; }
-        .card-desc { margin: 0 0 12px 0; font-size: 13px; color: #d1c7bd; line-height: 1.35; min-height: 34px; }
-        .card-footer { display: flex; flex-direction: column; gap: 10px; margin-top: auto; }
+        .catalog-grid { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 6px !important; width: 100%; }
+        .card { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 6px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 4px 15px rgba(0,0,0,0.2); min-width: 0; width: 100%; box-sizing: border-box; overflow: hidden; }
+        .card-img { width: 100%; height: 90px; border-radius: 8px; object-fit: cover; margin-bottom: 6px; }
+        .card-title { margin: 0 0 4px 0; font-size: 14px; font-weight: 700; color: #ffffff; line-height: 1.15; word-break: break-word; }
+        .card-desc { margin: 0 0 10px 0; font-size: 12px; color: #d1c7bd; line-height: 1.35; min-height: 28px; }
+        .card-footer { display: flex; flex-direction: column; gap: 8px; margin-top: auto; }
         .price-weight { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
-        .card-price { font-weight: 700; color: #ffcc99; font-size: 16px; white-space: nowrap; }
+        .card-price { font-weight: 700; color: #ffcc99; font-size: 15px; white-space: nowrap; }
         .card-weight { font-size: 12px; color: #b8aba0; white-space: nowrap; }
-        .counter-row { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.12); border-radius: 20px; padding: 4px 8px; gap: 6px; }
+        .counter-row { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.12); border-radius: 20px; padding: 4px 6px; gap: 4px; }
         .round-btn { background: #c88a53; color: #ffffff; border: none; width: 28px; height: 28px; border-radius: 50%; font-size: 16px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .counter-value { font-size: 16px; font-weight: 700; color: #ffffff; }
         .btn-action { background-color: #c88a53; color: #fff; border: none; border-radius: 10px; padding: 11px 4px; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; text-align: center; }
