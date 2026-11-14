@@ -1,34 +1,37 @@
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ ok: false, error: "Method not allowed" });
+  if (req.method !== 'POST') {
+    return res.status(405).json({ ok: false, error: 'Method not allowed' });
+  }
+
+  const { text } = req.body || {};
+  if (!text) {
+    return res.status(400).json({ ok: false, error: 'No text' });
+  }
+
+  // ТВОИ названия из Vercel
+  const idInstance = process.env.GREEN_INSTANCE_ID || process.env.GREEN_API_ID;
+  const apiToken = process.env.GREEN_API_TOKEN;
+  const GROUP_JID = process.env.WHATSAPP_GROUP_ID || "120363412926790169@g.us";
+
+  if (!idInstance || !apiToken) {
+    return res.status(500).json({ ok: false, error: 'Green API env not set' });
   }
 
   try {
-    const { text } = req.body || {};
-    if (!text) {
-      return res.status(400).json({ ok: false, error: "No text" });
-    }
-
-    const INSTANCE = "710722800074";
-    const TOKEN = "e556703a622149d181b286dcfb9b867369e53fd82c214a66b6";
-    const GROUP_ID = "120363412926790169@g.us";
-
-    const url = `https://7107.api.greenapi.com/waInstance${INSTANCE}/sendMessage/${TOKEN}`;
-
-    const r = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chatId: GROUP_ID, message: text })
+    const r = await fetch(`https://api.green-api.com/waInstance${idInstance}/sendMessage/${apiToken}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chatId: GROUP_JID, message: text })
     });
 
     const data = await r.json().catch(() => ({}));
 
     if (!r.ok) {
-      return res.status(500).json({ ok: false, error: "GreenAPI error", detail: data });
+      return res.status(500).json({ ok: false, error: data?.message || 'Green API error', detail: data });
     }
 
-    return res.status(200).json({ ok: true, idMessage: data.idMessage || null });
+    return res.status(200).json({ ok: true, idMessage: data.idMessage });
   } catch (e) {
-    return res.status(500).json({ ok: false, error: String(e.message || e) });
+    return res.status(500).json({ ok: false, error: String(e) });
   }
 }
