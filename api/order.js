@@ -1,4 +1,4 @@
-// api/order.js - Home Bread - заказ в группу + копия клиенту + ссылка ответить
+// api/order.js - Home Bread - работает и с RU (+7) и с TR (+90) номерами
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   try {
@@ -10,16 +10,28 @@ export default async function handler(req, res) {
     const totalSum = total || items.reduce((s, i) => s + Number(i.price) * Number(i.qty), 0);
     const itemsText = items.map(i => `• ${i.name} x${i.qty} — ${i.price * i.qty} ₺`).join('\n');
 
-    // --- Правильно чистим номер ---
-    // +90 555 123 45 67 -> 905551234567
-    // 0555 123 45 67 -> 905551234567
-    // 555 123 45 67 -> 905551234567
-    let cleanPhone = String(phone).replace(/\D/g, '');
-    if (cleanPhone.startsWith('0')) cleanPhone = '90' + cleanPhone.slice(1);
-    if (cleanPhone.length === 10 && cleanPhone.startsWith('5')) cleanPhone = '90' + cleanPhone;
+    // --- Умная чистка номера: RU и TR ---
+    function normalizePhone(raw) {
+      let p = String(raw).replace(/\D/g, '');
+      // Россия: 8 905 123 45 67 -> 79051234567
+      if (p.length === 11 && p.startsWith('8')) return '7' + p.slice(1);
+      // Россия: 905 123 45 67 (10 цифр, начинается с 9) -> 79051234567
+      if (p.length === 10 && p.startsWith('9')) return '7' + p;
+      // Россия: уже 79... -> оставляем
+      if (p.length === 11 && p.startsWith('7')) return p;
+      // Турция: 0 555 123 45 67 -> 905551234567
+      if (p.length === 11 && p.startsWith('0')) return '90' + p.slice(1);
+      // Турция: 555 123 45 67 (10 цифр, начинается с 5) -> 90555...
+      if (p.length === 10 && p.startsWith('5')) return '90' + p;
+      // Турция: уже 90... -> оставляем
+      if (p.length === 12 && p.startsWith('90')) return p;
+      return p;
+    }
+
+    const cleanPhone = normalizePhone(phone);
     const waLink = `https://wa.me/${cleanPhone}`;
 
-    // 1. Сообщение в группу - для вас + СССЫЛКА ОТВЕТИТЬ
+    // 1. В группу + ссылка ответить
     const groupMessage = `🍞 *NEW ORDER - Home Bread*\n\n` +
       `👤 Name: ${name}\n` +
       `📞 Phone: ${phone}\n` +
@@ -59,14 +71,11 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Green API failed', details: groupRes.txt });
     }
 
-    // Копия клиенту
     let clientSent = false;
     if (cleanPhone.length >= 11) {
       const clientRes = await send(`${cleanPhone}@c.us`, clientMessage);
       clientSent = clientRes.ok;
       if (!clientRes.ok) console.error('Client copy failed:', clientRes.txt);
-    } else {
-      console.error('Bad phone, cannot send copy:', phone, '->', cleanPhone);
     }
 
     return res.status(200).json({ ok: true, clientSent, cleanPhone });
