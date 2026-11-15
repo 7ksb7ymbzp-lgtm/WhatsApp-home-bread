@@ -28,7 +28,7 @@ export default async function handler(req, res) {
     text += `\nИтого: ${total || '-'} ₺\n`;
     if (comment) text += `Комментарий: ${comment}\n`;
 
-    const r = await fetch(`https://api.green-api.com/waInstance${instanceId}/sendMessage/${apiToken}`, {
+    const r = await fetch(`https://7107.api.green-api.com/waInstance${instanceId}/sendMessage/${apiToken}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ chatId: groupId, message: text }),
