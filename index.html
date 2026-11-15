@@ -140,17 +140,36 @@
         function escapeHtml(str) { return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;"); }
         function setLang(lang){ currentLang = lang; localStorage.setItem('hlebnitsa_lang', lang); document.getElementById('btn-en').classList.toggle('active', lang==='en'); document.getElementById('btn-de').classList.toggle('active', lang==='de'); const t = T[lang]; document.documentElement.lang = lang; document.getElementById('t-title').innerText = t.title; document.getElementById('t-subtitle').innerHTML = t.subtitle; document.getElementById('t-delivery').innerText = t.delivery; document.getElementById('searchInput').placeholder = t.search; document.getElementById('t-cart-label').innerText = t.cartLabel; document.getElementById('t-pcs').innerText = t.pcs; document.getElementById('t-view-order').innerText = t.viewOrder; document.getElementById('t-your-order').innerText = t.yourOrder; document.getElementById('t-name-label').innerText = t.nameLabel; document.getElementById('t-phone-label').innerText = t.phoneLabel; document.getElementById('t-address-label').innerText = t.addressLabel; document.getElementById('t-comment-label').innerText = t.commentLabel; document.getElementById('order-comment').placeholder = t.commentPh; document.getElementById('t-send-btn').innerText = t.sendBtn; renderCatalog(); updateCartState(); }
         function renderCatalog() {
-            const container = document.getElementById("catalog-container"); if (!container) return;
-            const t = T[currentLang]; let html = ""; let currentCategory = "";
-            const filteredProducts = products.filter(p => pName(p).toLowerCase().includes(searchQuery) || pDesc(p).toLowerCase().includes(searchQuery) || pCat(p).toLowerCase().includes(searchQuery));
-            if (filteredProducts.length === 0) { container.innerHTML = `<div style="text-align:center; padding: 40px; color: #ffcc99; font-size: 18px;">${t.notFound}</div>`; return; }
-            filteredProducts.forEach((p) => {
+            const container = document.getElementById("catalog-container");
+            if (!container) return;
+            const t = T[currentLang];
+            container.innerHTML = "";
+            const filtered = products.filter(p => pName(p).toLowerCase().includes(searchQuery) || pDesc(p).toLowerCase().includes(searchQuery) || pCat(p).toLowerCase().includes(searchQuery));
+            if (filtered.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding: 40px; color: #ffcc99; font-size: 18px;">${t.notFound}</div>`;
+                return;
+            }
+            let currentCategory = "";
+            let grid = null;
+            filtered.forEach((p) => {
                 const originalIndex = products.findIndex(item => item === p);
-                if (pCat(p) !== currentCategory) { if (currentCategory !== "") html += `</div>`; currentCategory = pCat(p); html += `<div class="category-title">${escapeHtml(currentCategory)}</div><div class="catalog-grid">`; }
-                const key = p.name_en; const count = cart[key] ? cart[key].count : 0;
-                html += `<div class="card"><img src="${escapeHtml(p.img)}" class="card-img" alt="${escapeHtml(pName(p))}"><div><div class="card-title">${escapeHtml(pName(p))}</div><div class="card-desc">${escapeHtml(pDesc(p))}</div></div><div class="card-footer"><div class="price-weight"><div class="card-price">${p.price} ₺</div><div class="card-weight">${escapeHtml(p.weight)}</div></div><div>${count === 0 ? `<button class="btn-action" onclick="changeQty(${originalIndex}, 1)">${t.add}</button>` : `<div class="counter-row"><button class="round-btn" onclick="changeQty(${originalIndex}, -1)">-</button><span class="counter-value">${count}</span><button class="round-btn" onclick="changeQty(${originalIndex}, 1)">+</button></div>`}</div></div></div>`;
+                if (pCat(p) !== currentCategory) {
+                    currentCategory = pCat(p);
+                    const title = document.createElement("div");
+                    title.className = "category-title";
+                    title.textContent = currentCategory;
+                    container.appendChild(title);
+                    grid = document.createElement("div");
+                    grid.className = "catalog-grid";
+                    container.appendChild(grid);
+                }
+                const key = p.name_en;
+                const count = cart[key] ? cart[key].count : 0;
+                const card = document.createElement("div");
+                card.className = "card";
+                card.innerHTML = `<img src="${escapeHtml(p.img)}" class="card-img" alt="${escapeHtml(pName(p))}"><div><div class="card-title">${escapeHtml(pName(p))}</div><div class="card-desc">${escapeHtml(pDesc(p))}</div></div><div class="card-footer"><div class="price-weight"><div class="card-price">${p.price} ₺</div><div class="card-weight">${escapeHtml(p.weight)}</div></div><div>${count === 0 ? `<button class="btn-action" onclick="changeQty(${originalIndex}, 1)">${t.add}</button>` : `<div class="counter-row"><button class="round-btn" onclick="changeQty(${originalIndex}, -1)">-</button><span class="counter-value">${count}</span><button class="round-btn" onclick="changeQty(${originalIndex}, 1)">+</button></div>`}</div></div>`;
+                grid.appendChild(card);
             });
-            if (currentCategory !== "") html += `</div>`; container.innerHTML = html;
         }
         function toggleSearchPopup() { const popup = document.getElementById("searchPopup"); const searchMainBtn = document.getElementById("searchMainBtn"); const searchCloseBtn = document.getElementById("searchCloseBtn"); if (popup.style.display === "flex") { popup.style.display = "none"; } else { popup.style.display = "flex"; document.getElementById("searchInput").focus(); if (document.getElementById("searchInput").value.trim().length > 0) { searchMainBtn.style.display = "none"; searchCloseBtn.style.display = "flex"; } } }
         function handleSearch() { const input = document.getElementById("searchInput"); searchQuery = input.value.trim().toLowerCase(); const suggestionsBox = document.getElementById("searchSuggestions"); const searchMainBtn = document.getElementById("searchMainBtn"); const searchCloseBtn = document.getElementById("searchCloseBtn"); renderCatalog(); if (searchQuery.length > 0) { searchMainBtn.style.display = "none"; searchCloseBtn.style.display = "flex"; const matches = products.filter(p => pName(p).toLowerCase().includes(searchQuery) || pDesc(p).toLowerCase().includes(searchQuery)); if (matches.length > 0) { let suggestHtml = ""; matches.slice(0, 5).forEach(m => { const originalIndex = products.findIndex(item => item === m); suggestHtml += `<div class="suggestion-item" onclick="selectSuggestion(${originalIndex})"><img src="${escapeHtml(m.img)}" class="suggestion-img"><div><span style="font-size:15px; font-weight:600; color:#fff;">${escapeHtml(pName(m))}</span><br><span style="font-size:14px; color:#ffcc99;">${m.price} ₺</span></div></div>`; }); suggestionsBox.innerHTML = suggestHtml; suggestionsBox.style.display = "flex"; } else { suggestionsBox.innerHTML = `<div style="padding:10px; font-size:14px; color:#d1c7bd; text-align:center;">${T[currentLang].notFound}</div>`; suggestionsBox.style.display = "flex"; } } else { searchMainBtn.style.display = "flex"; searchCloseBtn.style.display = "none"; suggestionsBox.innerHTML = ""; suggestionsBox.style.display = "none"; } }
@@ -177,4 +196,21 @@
                 }
             }
             if (items.length === 0) { alert(t.empty); return; }
-            const btn = document.querySelector(".modal-checkout-btn"); const oldText = btn ? btn.innerText :
+            const btn = document.querySelector(".modal-checkout-btn"); const oldText = btn ? btn.innerText : "";
+            if (btn) { btn.innerText = t.sending; btn.disabled = true; }
+            try {
+                const res = await fetch("/api/order", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, phone, address, items, total: totalSum, comment }) });
+                const data = await res.json().catch(() => ({}));
+                if (res.ok && data.ok) {
+                    alert(t.sent); cart = {};
+                    document.getElementById("order-name").value = ""; document.getElementById("order-phone").value = ""; document.getElementById("order-address").value = ""; document.getElementById("order-comment").value = "";
+                    renderCatalog(); updateCartState(); toggleModal(false);
+                } else { alert(t.err + (data.error || res.status)); }
+            } catch(e) { alert(t.noConn); }
+            if (btn) { btn.innerText = oldText; btn.disabled = false; }
+        }
+        function toggleModal(show) { const modal = document.getElementById("cart-modal"); if (modal) { modal.style.display = show ? "flex" : "none"; } }
+        setLang(currentLang);
+    </script>
+</body>
+</html>
