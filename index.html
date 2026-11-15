@@ -148,7 +148,7 @@
                 const originalIndex = products.findIndex(item => item === p);
                 if (pCat(p) !== currentCategory) { if (currentCategory !== "") html += `</div>`; currentCategory = pCat(p); html += `<div class="category-title">${escapeHtml(currentCategory)}</div><div class="catalog-grid">`; }
                 const key = p.name_en; const count = cart[key] ? cart[key].count : 0;
-                html += `<div class="card"><img src="${escapeHtml(p.img)}" class="card-img" alt="${escapeHtml(pName(p))}"><div><div class="card-title">${escapeHtml(pName(p))}</div><div class="card-desc">${escapeHtml(pDesc(p))}</div></div><div class="card-footer"><div class="price-weight"><div class="card-price">${p.price} ₺</div><div class="card-weight">${escapeHtml(p.weight)}</div></div><div>${count === 0 ? `<button class="btn-action" onclick="changeQty(${originalIndex}, 1)">${t.add}</button>` : `<div class="counter-row"><button class="round-btn" onclick="changeQty(${originalIndex}, -1)">-</button><span class="counter-value">${count}</span><button class="round-btn" onclick="changeQty(${originalIndex}, 1)">+</button></div>`}</div></div></div></div>`;
+                html += `<div class="card"><img src="${escapeHtml(p.img)}" class="card-img" alt="${escapeHtml(pName(p))}"><div><div class="card-title">${escapeHtml(pName(p))}</div><div class="card-desc">${escapeHtml(pDesc(p))}</div></div><div class="card-footer"><div class="price-weight"><div class="card-price">${p.price} ₺</div><div class="card-weight">${escapeHtml(p.weight)}</div></div><div>${count === 0 ? `<button class="btn-action" onclick="changeQty(${originalIndex}, 1)">${t.add}</button>` : `<div class="counter-row"><button class="round-btn" onclick="changeQty(${originalIndex}, -1)">-</button><span class="counter-value">${count}</span><button class="round-btn" onclick="changeQty(${originalIndex}, 1)">+</button></div>`}</div></div></div>`;
             });
             if (currentCategory !== "") html += `</div>`; container.innerHTML = html;
         }
@@ -177,21 +177,4 @@
                 }
             }
             if (items.length === 0) { alert(t.empty); return; }
-            const btn = document.querySelector(".modal-checkout-btn"); const oldText = btn ? btn.innerText : "";
-            if (btn) { btn.innerText = t.sending; btn.disabled = true; }
-            try {
-                const res = await fetch("/api/order", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, phone, address, items, total: totalSum, comment }) });
-                const data = await res.json().catch(() => ({}));
-                if (res.ok && data.ok) {
-                    alert(t.sent); cart = {};
-                    document.getElementById("order-name").value = ""; document.getElementById("order-phone").value = ""; document.getElementById("order-address").value = ""; document.getElementById("order-comment").value = "";
-                    renderCatalog(); updateCartState(); toggleModal(false);
-                } else { alert(t.err + (data.error || res.status)); }
-            } catch(e) { alert(t.noConn); }
-            if (btn) { btn.innerText = oldText; btn.disabled = false; }
-        }
-        function toggleModal(show) { const modal = document.getElementById("cart-modal"); if (modal) { modal.style.display = show ? "flex" : "none"; } }
-        setLang(currentLang);
-    </script>
-</body>
-</html>
+            const btn = document.querySelector(".modal-checkout-btn"); const oldText = btn ? btn.innerText :
