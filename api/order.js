@@ -16,6 +16,9 @@ export default async function handler(req, res) {
       return res.status(500).json({ ok: false, error: 'No Green API env vars' });
     }
 
+    const cleanPhone = String(phone || '').replace(/\D/g, '');
+    const replyLink = `https://wa.me/${cleanPhone}`;
+
     let text = `🍞 НОВЫЙ ЗАКАЗ\n\n`;
     text += `Имя: ${name || '-'}\n`;
     text += `Телефон: ${phone || '-'}\n`;
@@ -27,6 +30,7 @@ export default async function handler(req, res) {
     }
     text += `\nИтого: ${total || '-'} ₺\n`;
     if (comment) text += `Комментарий: ${comment}\n`;
+    text += `\n👉 Ответить клиенту: ${replyLink}\n`;
 
     const r = await fetch(`https://7107.api.green-api.com/waInstance${instanceId}/sendMessage/${apiToken}`, {
       method: 'POST',
