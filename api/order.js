@@ -1,4 +1,4 @@
-// api/order.js - Home Bread - заказ в группу + копия клиенту
+// api/order.js - Home Bread - заказ в группу + копия клиенту + ссылка ответить
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   try {
@@ -10,16 +10,26 @@ export default async function handler(req, res) {
     const totalSum = total || items.reduce((s, i) => s + Number(i.price) * Number(i.qty), 0);
     const itemsText = items.map(i => `• ${i.name} x${i.qty} — ${i.price * i.qty} ₺`).join('\n');
 
-    // 1. Сообщение в группу - для вас
+    // --- Правильно чистим номер ---
+    // +90 555 123 45 67 -> 905551234567
+    // 0555 123 45 67 -> 905551234567
+    // 555 123 45 67 -> 905551234567
+    let cleanPhone = String(phone).replace(/\D/g, '');
+    if (cleanPhone.startsWith('0')) cleanPhone = '90' + cleanPhone.slice(1);
+    if (cleanPhone.length === 10 && cleanPhone.startsWith('5')) cleanPhone = '90' + cleanPhone;
+    const waLink = `https://wa.me/${cleanPhone}`;
+
+    // 1. Сообщение в группу - для вас + СССЫЛКА ОТВЕТИТЬ
     const groupMessage = `🍞 *NEW ORDER - Home Bread*\n\n` +
       `👤 Name: ${name}\n` +
       `📞 Phone: ${phone}\n` +
       `📍 Address: ${address}\n` +
       `💬 Comment: ${comment || '-'}\n\n` +
       `*Order:*\n${itemsText}\n\n` +
-      `*Total: ${totalSum} ₺*`;
+      `*Total: ${totalSum} ₺*\n\n` +
+      `👉 *Ответить клиенту:* ${waLink}`;
 
-    // 2. Копия клиенту - подтверждение
+    // 2. Копия клиенту
     const clientMessage = `🍞 *Home Bread - Ваш заказ принят!*\n\n` +
       `Здравствуйте, ${name}! Спасибо за заказ 🙏\n\n` +
       `*Ваш заказ:*\n${itemsText}\n\n` +
@@ -40,26 +50,26 @@ export default async function handler(req, res) {
         body: JSON.stringify({ chatId, message })
       });
       const txt = await r.text();
+      console.log('Green API send to', chatId, 'status', r.status, txt);
       return { ok: r.ok, txt };
     }
 
-    // Отправляем в группу
     const groupRes = await send(GROUP_ID, groupMessage);
     if (!groupRes.ok) {
-      console.error('Green API group error:', groupRes.txt);
       return res.status(500).json({ error: 'Green API failed', details: groupRes.txt });
     }
 
-    // Отправляем копию клиенту - чистим номер: +90 555... -> 90555...@c.us
-    const cleanPhone = String(phone).replace(/\D/g, '');
-    if (cleanPhone.length >= 10) {
-      const clientChatId = `${cleanPhone}@c.us`;
-      const clientRes = await send(clientChatId, clientMessage);
-      // Если клиенту не отправилось (нет WhatsApp, заблокировал) - заказ в группу уже ушёл, это не ошибка
-      if (!clientRes.ok) console.error('Green API client copy error:', clientRes.txt);
+    // Копия клиенту
+    let clientSent = false;
+    if (cleanPhone.length >= 11) {
+      const clientRes = await send(`${cleanPhone}@c.us`, clientMessage);
+      clientSent = clientRes.ok;
+      if (!clientRes.ok) console.error('Client copy failed:', clientRes.txt);
+    } else {
+      console.error('Bad phone, cannot send copy:', phone, '->', cleanPhone);
     }
 
-    return res.status(200).json({ ok: true });
+    return res.status(200).json({ ok: true, clientSent, cleanPhone });
   } catch (e) {
     console.error(e);
     return res.status(500).json({ error: 'Server error' });
